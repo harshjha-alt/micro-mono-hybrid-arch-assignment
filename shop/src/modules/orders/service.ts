@@ -1,5 +1,12 @@
 import { orders, type Order } from "./repo.ts";
 
+
+
+import { reserve } from "../inventory/index.ts";
+import { charge } from "../payments/index.ts";
+import { send } from "../notifications/service.ts";
+
+
 // // VIOLATION: reaches past inventory's index.ts into its service
 // import { reserve } from "../inventory/service.ts";
 // // VIOLATION: reaches straight into inventory's private repo
@@ -8,11 +15,6 @@ import { orders, type Order } from "./repo.ts";
 // import { charge } from "../payments/service.ts";
 // // VIOLATION: orders should not call notifications at all - task 3
 // import { send } from "../notifications/service.ts";
-
-
-import { reserve } from "../inventory/index.ts";
-import { charge } from "../payments/index.ts";
-import { send } from "../notifications/service.ts";
 
 export type PlaceResult =
   | { ok: true; orderId: string; amountPaise: number }
