@@ -22,6 +22,45 @@ export interface EventBus {
   subscribe<K extends EventName>(name: K, fn: Handler<K>): Unsubscribe;
 }
 
+type Subscription = {
+  handler: Handler<EventName>;
+};
+
 export function createEventBus(): EventBus {
-  throw new Error("not implemented");
+  const subscriptions = new Map<EventName, Subscription[]>();
+
+  return {
+    publish(name, payload) {
+      const listeners = [...(subscriptions.get(name) ?? [])];
+
+      for (const subscription of listeners) {
+        try {
+          subscription.handler(payload);
+        } catch {
+          // A failing listener must not prevent the remaining listeners.
+        }
+      }
+
+      return listeners.length;
+    },
+
+    subscribe(name, fn) {
+      const subscription: Subscription = {
+        handler: fn as Handler<EventName>,
+      };
+      const listeners = subscriptions.get(name) ?? [];
+      listeners.push(subscription);
+      subscriptions.set(name, listeners);
+
+      return () => {
+        const currentListeners = subscriptions.get(name);
+        if (!currentListeners) return;
+
+        const index = currentListeners.indexOf(subscription);
+        if (index !== -1) currentListeners.splice(index, 1);
+      };
+    },
+  };
 }
+
+export const eventBus = createEventBus();
